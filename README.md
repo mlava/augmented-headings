@@ -17,4 +17,4 @@ If your heading is H4 and you click to toggle H4, it will return to normal text.
 
 TODO:
 1. Enhance Sticky Headings extension to respect these new heading levels H4-H6
-~~2. Enhance Table of Contents extension to respect these new heading levels H4-H6~~
+2. ~~Enhance Table of Contents extension to respect these new heading levels H4-H6~~
