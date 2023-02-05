@@ -2,12 +2,22 @@ var h4FS, h4FW, h4FSt;
 var h5FS, h5FW, h5FSt;
 var h6FS, h6FW, h6FSt;
 var h4FV, h5FV, h6FV;
+var h4Tag, h5Tag, h6Tag;
 
 export default {
     onload: ({ extensionAPI }) => {
         const config = {
             tabTitle: "Augmented Headings",
             settings: [
+                {
+                    id: "h4-tag",
+                    name: "H4 Tag",
+                    description: "Preferred tag to recognise as H4",
+                    action: {
+                        type: "input", placeholder: "h4",
+                        onChange: (evt) => { setTags(evt, 1); }
+                    },
+                },
                 {
                     id: "h4-fontSize",
                     name: "H4 Font Size",
@@ -36,6 +46,15 @@ export default {
                     action: { type: "select", items: ["normal", "small-caps", "all-small-caps", "unicase"], onChange: (evt) => { setFonts(evt, 10); } },
                 },
                 {
+                    id: "h5-tag",
+                    name: "H5 Tag",
+                    description: "Preferred tag to recognise as H5",
+                    action: {
+                        type: "input", placeholder: "h5",
+                        onChange: (evt) => { setTags(evt, 2); }
+                    },
+                },
+                {
                     id: "h5-fontSize",
                     name: "H5 Font Size",
                     description: "Font Size for your H5 headings, as an integer",
@@ -61,6 +80,15 @@ export default {
                     name: "H5 Font Variant",
                     description: "Font Variant for your H5 Headings",
                     action: { type: "select", items: ["normal", "small-caps", "all-small-caps", "unicase"], onChange: (evt) => { setFonts(evt, 11); } },
+                },
+                {
+                    id: "h6-tag",
+                    name: "H6 Tag",
+                    description: "Preferred tag to recognise as H6",
+                    action: {
+                        type: "input", placeholder: "h6",
+                        onChange: (evt) => { setTags(evt, 3); }
+                    },
                 },
                 {
                     id: "h6-fontSize",
@@ -117,7 +145,7 @@ export default {
                 toggleHeading(uid, level);
             }
         });
-        
+
         window.roamAlphaAPI.ui.blockContextMenu.addCommand({
             label: "Toggle Heading - H4",
             callback: (e) => {
@@ -144,20 +172,57 @@ export default {
         });
 
         // onload
-        h4FS = extensionAPI.settings.get("h4-fontSize");
+        if (!extensionAPI.settings.get("h4-tag")) {
+            h4Tag = "h4";
+        } else {
+            h4Tag = extensionAPI.settings.get("h4-tag");
+        }
+        if (!extensionAPI.settings.get("h4-fontSize")) {
+            h4FS = "16";
+        } else {
+            h4FS = extensionAPI.settings.get("h4-fontSize");
+        }
         h4FW = extensionAPI.settings.get("h4-fontWeight");
         h4FSt = extensionAPI.settings.get("h4-fontStyle");
         h4FV = extensionAPI.settings.get("h4-fontVar");
-        h5FS = extensionAPI.settings.get("h5-fontSize");
+        if (!extensionAPI.settings.get("h5-tag")) {
+            h5Tag = "h5";
+        } else {
+            h5Tag = extensionAPI.settings.get("h5-tag");
+        }
+        if (!extensionAPI.settings.get("h5-fontSize")) {
+            h5FS = "14";
+        } else {
+            h5FS = extensionAPI.settings.get("h5-fontSize");
+        }
         h5FW = extensionAPI.settings.get("h5-fontWeight");
         h5FSt = extensionAPI.settings.get("h5-fontStyle");
         h5FV = extensionAPI.settings.get("h5-fontVar");
-        h6FS = extensionAPI.settings.get("h6-fontSize");
+        if (!extensionAPI.settings.get("h6-tag")) {
+            h6Tag = "h6";
+        } else {
+            h6Tag = extensionAPI.settings.get("h6-tag");
+        }
+        if (!extensionAPI.settings.get("h6-fontSize")) {
+            h6FS = "12";
+        } else {
+            h6FS = extensionAPI.settings.get("h6-fontSize");
+        }
         h6FW = extensionAPI.settings.get("h6-fontWeight");
         h6FSt = extensionAPI.settings.get("h6-fontStyle");
         h6FV = extensionAPI.settings.get("h6-fontVar");
 
         // on change in settings
+        function setTags(evt, i) {
+            if (i == 1) {
+                h4Tag = evt.target.value;
+            } else if (i == 2) {
+                h5Tag = evt.target.value;
+            } else if (i == 3) {
+                h6Tag = evt.target.value
+            }
+            headingsCSS();
+        }
         function setFonts(evt, i) {
             if (i == 1) {
                 h4FS = evt.target.value;
@@ -218,9 +283,19 @@ export default {
 
 async function headingsCSS() {
     var cssString = "";
-    cssString += "[data-tag^='h4'] {display:none !important;} [data-tag^='h4'] + .rm-highlight {font-size: "+h4FS+"px !important; font-weight: "+h4FW+" !important; font-style: "+h4FSt+" !important; font-variant: "+h4FV+" !important; background: unset !important} ";
-    cssString += "[data-tag^='h5'] {display:none !important;} [data-tag^='h5'] + .rm-highlight {font-size: "+h5FS+"px !important; font-weight: "+h5FW+" !important; font-style: "+h5FSt+" !important; font-variant: "+h5FV+" !important; background: unset !important} ";
-    cssString += "[data-tag^='h6'] {display:none !important;} [data-tag^='h6'] + .rm-highlight {font-size: "+h6FS+"px !important; font-weight: "+h6FW+" !important; font-style: "+h6FSt+" !important; font-variant: "+h6FV+" !important; background: unset !important}";
+    const regex = /^#.+$/;
+    if (h4Tag.match(regex)) {
+        h4Tag = h4Tag.replace("#", "");
+    }
+    if (h5Tag.match(regex)) {
+        h5Tag = h5Tag.replace("#", "");
+    }
+    if (h6Tag.match(regex)) {
+        h6Tag = h6Tag.replace("#", "");
+    }
+    cssString += "[data-tag^='" + h4Tag + "'] {display:none !important;} [data-tag^='" + h4Tag + "'] + .rm-highlight {font-size: " + h4FS + "px !important; font-weight: " + h4FW + " !important; font-style: " + h4FSt + " !important; font-variant: " + h4FV + " !important; background: unset !important} ";
+    cssString += "[data-tag^='" + h5Tag + "'] {display:none !important;} [data-tag^='" + h5Tag + "'] + .rm-highlight {font-size: " + h5FS + "px !important; font-weight: " + h5FW + " !important; font-style: " + h5FSt + " !important; font-variant: " + h5FV + " !important; background: unset !important} ";
+    cssString += "[data-tag^='" + h6Tag + "'] {display:none !important;} [data-tag^='" + h6Tag + "'] + .rm-highlight {font-size: " + h6FS + "px !important; font-weight: " + h6FW + " !important; font-style: " + h6FSt + " !important; font-variant: " + h6FV + " !important; background: unset !important}";
     var head = document.getElementsByTagName("head")[0]; // remove any existing styles and add updated styles
     if (document.getElementById("headings-css")) {
         var cssStyles = document.getElementById("headings-css");
@@ -235,20 +310,55 @@ async function headingsCSS() {
 async function toggleHeading(uid, level) {
     let q = `[:find (pull ?page [:node/title :block/string :block/uid :block/heading]) :where [?page :block/uid "${uid}"] ]`;
     var results = await window.roamAlphaAPI.q(q);
-
-    const regex = /^#(h\d)\^\^(.+)\^\^$/; // check for H4-H6 heading code
-    if (regex.test(results[0][0].string.toString())) { // found an existing heading
-        const array = [...results[0][0].string.toString().match(regex)]; // get matched groups
-        if (array[1] === level) { // this is turning off the heading
-            await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: array[2], open: true } });
-        } else { // this is changing heading level
-            var newString = "#"+level+"^^"+array[2]+"^^";
+    let string = results[0][0].string.toString();
+    if (level == "h4") {
+        if (string.match(h4Tag)) { // this is turning off the heading
+            string = string.replace("#"+h4Tag+"", "");
+            string = string.replaceAll("^^", "");
+            await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: string.toString(), open: true } });
+        } else if (string.match(h5Tag) || string.match(h6Tag)) { // changing heading level
+            string = string.replace("#"+h5Tag+"", "");
+            string = string.replace("#"+h6Tag+"", "");
+            string = string.replaceAll("^^", "");
+            var newString = "#" + h4Tag + "^^" + string + "^^";
+            await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: newString, open: true } });
+        } 
+        else { // create a new heading
+            var newString = "#" + h4Tag + "^^" + string.toString() + "^^";
             await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: newString, open: true } });
         }
-    } else { // not a heading, so make it one
-        let q = `[:find (pull ?page [:node/title :block/string :block/uid :block/heading]) :where [?page :block/uid "${uid}"] ]`;
-        var results = await window.roamAlphaAPI.q(q);
-        var newString = "#"+level+"^^"+results[0][0].string.toString()+"^^";
-        await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: newString, open: true } });
-    }
+    } else if (level == "h5") {
+        if (string.match(h5Tag)) { // this is turning off the heading
+            string = string.replace("#"+h5Tag+"", "");
+            string = string.replaceAll("^^", "");
+            await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: string.toString(), open: true } });
+        } else if (string.match(h4Tag) || string.match(h6Tag)) { // changing heading level
+            string = string.replace("#"+h4Tag+"", "");
+            string = string.replace("#"+h6Tag+"", "");
+            string = string.replaceAll("^^", "");
+            var newString = "#" + h5Tag + "^^" + string + "^^";
+            await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: newString, open: true } });
+        } 
+        else { // create a new heading
+            var newString = "#" + h5Tag + "^^" + string.toString() + "^^";
+            await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: newString, open: true } });
+        }
+    } else if (level == "h6") {
+        if (string.match(h6Tag)) { // this is turning off the heading
+            string = string.replace("#"+h6Tag+"", "");
+            string = string.replaceAll("^^", "");
+            await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: string.toString(), open: true } });
+        } else if (string.match(h4Tag) || string.match(h5Tag)) { // changing heading level
+            string = string.replace("#"+h4Tag+"", "");
+            string = string.replace("#"+h5Tag+"", "");
+            string = string.replaceAll("^^", "");
+            var newString = "#" + h6Tag + "^^" + string + "^^";
+            await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: newString, open: true } });
+        } 
+        else { // create a new heading
+            var newString = "#" + h6Tag + "^^" + string.toString() + "^^";
+            await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: newString, open: true } });
+        }
+    } 
+
 }
