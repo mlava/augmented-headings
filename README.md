@@ -2,6 +2,9 @@ Add H4, H5 and H6 headings to your Roam Research graph!
 
 With this extension, you can create H4-H6 headings and control their CSS very easily. Simply install the extension and then modify the settings in Roam Depot. Note that if you don't change the font settings in Roam Depot settings you won't see any change in the text output even if you make that block a heading. You **must** set font settings to see any difference.
 
+**New:**
+- added setting to allow user-configured heading tags. If you don't want #h4 you could use #.h4 or even #purple_elephant for that heading tag, and the extension will handle it.
+
 The new headings even work with my Sticky Headings and Table of Contents extension as well!
 
 ![image](https://user-images.githubusercontent.com/6857790/214956832-d2711867-ab73-4af0-9e29-074eaf0b3ac8.png)
