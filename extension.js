@@ -174,8 +174,10 @@ export default {
         // onload
         if (!extensionAPI.settings.get("h4-tag")) {
             h4Tag = "h4";
+            localStorage.setItem("augmented_headings:h4", h4Tag);
         } else {
             h4Tag = extensionAPI.settings.get("h4-tag");
+            localStorage.setItem("augmented_headings:h4", h4Tag);
         }
         if (!extensionAPI.settings.get("h4-fontSize")) {
             h4FS = "16";
@@ -187,8 +189,10 @@ export default {
         h4FV = extensionAPI.settings.get("h4-fontVar");
         if (!extensionAPI.settings.get("h5-tag")) {
             h5Tag = "h5";
+            localStorage.setItem("augmented_headings:h5", h5Tag);
         } else {
             h5Tag = extensionAPI.settings.get("h5-tag");
+            localStorage.setItem("augmented_headings:h5", h5Tag);
         }
         if (!extensionAPI.settings.get("h5-fontSize")) {
             h5FS = "14";
@@ -200,8 +204,10 @@ export default {
         h5FV = extensionAPI.settings.get("h5-fontVar");
         if (!extensionAPI.settings.get("h6-tag")) {
             h6Tag = "h6";
+            localStorage.setItem("augmented_headings:h6", h6Tag);
         } else {
             h6Tag = extensionAPI.settings.get("h6-tag");
+            localStorage.setItem("augmented_headings:h6", h6Tag);
         }
         if (!extensionAPI.settings.get("h6-fontSize")) {
             h6FS = "12";
@@ -216,10 +222,13 @@ export default {
         function setTags(evt, i) {
             if (i == 1) {
                 h4Tag = evt.target.value;
+                localStorage.setItem("augmented_headings:h4", h4Tag);
             } else if (i == 2) {
                 h5Tag = evt.target.value;
+                localStorage.setItem("augmented_headings:h5", h5Tag);
             } else if (i == 3) {
                 h6Tag = evt.target.value
+                localStorage.setItem("augmented_headings:h6", h6Tag);
             }
             headingsCSS();
         }
@@ -293,9 +302,16 @@ async function headingsCSS() {
     if (h6Tag.match(regex)) {
         h6Tag = h6Tag.replace("#", "");
     }
-    cssString += "[data-tag^='" + h4Tag + "'] {display:none !important;} [data-tag^='" + h4Tag + "'] + .rm-highlight {font-size: " + h4FS + "px !important; font-weight: " + h4FW + " !important; font-style: " + h4FSt + " !important; font-variant: " + h4FV + " !important; background: unset !important} ";
-    cssString += "[data-tag^='" + h5Tag + "'] {display:none !important;} [data-tag^='" + h5Tag + "'] + .rm-highlight {font-size: " + h5FS + "px !important; font-weight: " + h5FW + " !important; font-style: " + h5FSt + " !important; font-variant: " + h5FV + " !important; background: unset !important} ";
-    cssString += "[data-tag^='" + h6Tag + "'] {display:none !important;} [data-tag^='" + h6Tag + "'] + .rm-highlight {font-size: " + h6FS + "px !important; font-weight: " + h6FW + " !important; font-style: " + h6FSt + " !important; font-variant: " + h6FV + " !important; background: unset !important}";
+    const app = document.querySelector(".roam-body .roam-app");
+    const compApp = window.getComputedStyle(app);
+    let rrSize = compApp["fontSize"];
+    let rrWeight = compApp["fontWeight"];
+    let rrStyle = compApp["fontStyle"];
+    let rrVar = compApp["fontVariant"];
+    cssString += "[data-tag^='" + h4Tag + "'] {display:none;} [data-tag^='" + h4Tag + "'] + .rm-highlight {font-size: " + h4FS + "px; font-weight: " + h4FW + "; font-style: " + h4FSt + "; font-variant: " + h4FV + "; background: unset} ";
+    cssString += "[data-tag^='" + h5Tag + "'] {display:none;} [data-tag^='" + h5Tag + "'] + .rm-highlight {font-size: " + h5FS + "px; font-weight: " + h5FW + "; font-style: " + h5FSt + "; font-variant: " + h5FV + "; background: unset} ";
+    cssString += "[data-tag^='" + h6Tag + "'] {display:none;} [data-tag^='" + h6Tag + "'] + .rm-highlight {font-size: " + h6FS + "px; font-weight: " + h6FW + "; font-style: " + h6FSt + "; font-variant: " + h6FV + "; background: unset} ";
+    cssString += "[data-path-page-links*='" + h4Tag + "'], [data-path-page-links*='" + h5Tag + "'], [data-path-page-links*='" + h6Tag + "'] {font-size: " + rrSize + "; font-weight: " + rrWeight + "; font-style: " + rrStyle + "; font-variant: " + rrVar + ";}";
     var head = document.getElementsByTagName("head")[0]; // remove any existing styles and add updated styles
     if (document.getElementById("headings-css")) {
         var cssStyles = document.getElementById("headings-css");
@@ -313,52 +329,52 @@ async function toggleHeading(uid, level) {
     let string = results[0][0].string.toString();
     if (level == "h4") {
         if (string.match(h4Tag)) { // this is turning off the heading
-            string = string.replace("#"+h4Tag+"", "");
+            string = string.replace("#" + h4Tag + "", "");
             string = string.replaceAll("^^", "");
             await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: string.toString(), open: true } });
         } else if (string.match(h5Tag) || string.match(h6Tag)) { // changing heading level
-            string = string.replace("#"+h5Tag+"", "");
-            string = string.replace("#"+h6Tag+"", "");
+            string = string.replace("#" + h5Tag + "", "");
+            string = string.replace("#" + h6Tag + "", "");
             string = string.replaceAll("^^", "");
             var newString = "#" + h4Tag + "^^" + string + "^^";
             await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: newString, open: true } });
-        } 
+        }
         else { // create a new heading
             var newString = "#" + h4Tag + "^^" + string.toString() + "^^";
             await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: newString, open: true } });
         }
     } else if (level == "h5") {
         if (string.match(h5Tag)) { // this is turning off the heading
-            string = string.replace("#"+h5Tag+"", "");
+            string = string.replace("#" + h5Tag + "", "");
             string = string.replaceAll("^^", "");
             await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: string.toString(), open: true } });
         } else if (string.match(h4Tag) || string.match(h6Tag)) { // changing heading level
-            string = string.replace("#"+h4Tag+"", "");
-            string = string.replace("#"+h6Tag+"", "");
+            string = string.replace("#" + h4Tag + "", "");
+            string = string.replace("#" + h6Tag + "", "");
             string = string.replaceAll("^^", "");
             var newString = "#" + h5Tag + "^^" + string + "^^";
             await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: newString, open: true } });
-        } 
+        }
         else { // create a new heading
             var newString = "#" + h5Tag + "^^" + string.toString() + "^^";
             await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: newString, open: true } });
         }
     } else if (level == "h6") {
         if (string.match(h6Tag)) { // this is turning off the heading
-            string = string.replace("#"+h6Tag+"", "");
+            string = string.replace("#" + h6Tag + "", "");
             string = string.replaceAll("^^", "");
             await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: string.toString(), open: true } });
         } else if (string.match(h4Tag) || string.match(h5Tag)) { // changing heading level
-            string = string.replace("#"+h4Tag+"", "");
-            string = string.replace("#"+h5Tag+"", "");
+            string = string.replace("#" + h4Tag + "", "");
+            string = string.replace("#" + h5Tag + "", "");
             string = string.replaceAll("^^", "");
             var newString = "#" + h6Tag + "^^" + string + "^^";
             await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: newString, open: true } });
-        } 
+        }
         else { // create a new heading
             var newString = "#" + h6Tag + "^^" + string.toString() + "^^";
             await window.roamAlphaAPI.updateBlock({ block: { uid: uid, string: newString, open: true } });
         }
-    } 
+    }
 
 }
