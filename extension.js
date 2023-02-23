@@ -121,7 +121,7 @@ export default {
         };
         extensionAPI.settings.panel.create(config);
 
-        window.roamAlphaAPI.ui.commandPalette.addCommand({
+        extensionAPI.ui.commandPalette.addCommand({
             label: "Toggle Heading - H4",
             callback: () => {
                 const uid = window.roamAlphaAPI.ui.getFocusedBlock()?.["block-uid"];
@@ -129,7 +129,7 @@ export default {
                 toggleHeading(uid, level);
             }
         });
-        window.roamAlphaAPI.ui.commandPalette.addCommand({
+        extensionAPI.ui.commandPalette.addCommand({
             label: "Toggle Heading - H5",
             callback: () => {
                 const uid = window.roamAlphaAPI.ui.getFocusedBlock()?.["block-uid"];
@@ -137,7 +137,7 @@ export default {
                 toggleHeading(uid, level);
             }
         });
-        window.roamAlphaAPI.ui.commandPalette.addCommand({
+        extensionAPI.ui.commandPalette.addCommand({
             label: "Toggle Heading - H6",
             callback: () => {
                 const uid = window.roamAlphaAPI.ui.getFocusedBlock()?.["block-uid"];
@@ -269,15 +269,6 @@ export default {
             var cssStyles = document.getElementById("headings-css");
             head.removeChild(cssStyles);
         }
-        window.roamAlphaAPI.ui.commandPalette.removeCommand({
-            label: 'Toggle Heading - H4'
-        });
-        window.roamAlphaAPI.ui.commandPalette.removeCommand({
-            label: 'Toggle Heading - H5'
-        });
-        window.roamAlphaAPI.ui.commandPalette.removeCommand({
-            label: 'Toggle Heading - H6'
-        });
         window.roamAlphaAPI.ui.blockContextMenu.removeCommand({
             label: 'Toggle Heading - H4'
         });
