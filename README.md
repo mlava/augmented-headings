@@ -1,26 +1,68 @@
-Add H4, H5 and H6 headings to your Roam Research graph!
+# Augmented Headings
 
-With this extension, you can create H4-H6 headings and control their CSS very easily. Simply install the extension and then modify the settings in Roam Depot. Note that if you don't change the font settings in Roam Depot settings you won't see any change in the text output even if you make that block a heading. You **must** set font settings to see any difference.
+Add H4, H5, and H6 headings to your Roam Research graph.
 
-**New:**
-- Now compatible with the new user-defined hotkeys function - see Hotkeys option in Roam Research Settings
-- added setting to allow user-configured heading tags. If you don't want #h4 you could use #.h4 or even #purple_elephant for that heading tag, and the extension will handle it.
+Augmented Headings lets you mark any block as H4-H6 and style those headings independently. It integrates with Roam's native headings (H1-H3) without changing your workflow.
 
-The new headings even work with my Sticky Headings and Table of Contents extension as well!
+## How it works
 
-![image](https://user-images.githubusercontent.com/6857790/214956832-d2711867-ab73-4af0-9e29-074eaf0b3ac8.png)
+- New headings are stored as a block property: `ah-level` with values `h4`, `h5`, or `h6`.
+- Legacy headings created with tags like `#h4^^Heading^^` are still supported.
+- Legacy tag names are configurable and synced to localStorage so other extensions (Sticky Headings, Table of Contents) can detect them.
 
-For each heading level you can configure:
-- font size
-- font weight
-- font style
-- font variant
+## Features
 
-You can set a heading using the Command Palette. Click into a block and then select 'Toggle Heading - H4', 'Toggle Heading - H5' or 'Toggle Heading - H6'. 
-Or, right click on the block bullet, go to Plugins and then select the Toggle commands from there.
+- Toggle H4-H6 via Command Palette or block context menu
+- Per-level font size, weight, style, and variant controls
+- Works alongside Roam native headings (H1-H3)
+- Backward compatible with legacy tag-based headings
 
-If your heading is H4 and you click to toggle H4, it will return to normal text. This is how Roam handles H1-H3. However, if you toggle to a different heading level (e.g. H4 -> H5) it will overwrite to the new level. Again, this is how Roam handles this case.
+## Usage
 
-TODO:
-1. ~~Enhance Sticky Headings extension to respect these new heading levels H4-H6~~
-2. ~~Enhance Table of Contents extension to respect these new heading levels H4-H6~~
+1. Click into a block.
+2. Use Command Palette:
+   - Toggle Heading - H4
+   - Toggle Heading - H5
+   - Toggle Heading - H6
+3. Or right-click the block bullet and use the same toggle commands under Plugins.
+
+Toggling the same level again clears the heading. Toggling a different level replaces the current one.
+
+## Settings
+
+### Legacy H4/H5/H6 Tag
+Configure the legacy tag token used by older versions (default: `h4`, `h5`, `h6`). Examples:
+
+- `h4` (default) -> `#h4^^Heading^^`
+- `.h4` -> `#.h4^^Heading^^`
+- `purple_elephant` -> `#purple_elephant^^Heading^^`
+
+These tag names are synced to localStorage (`augmented_headings:h4`, `:h5`, `:h6`) so other extensions can detect them.
+
+### Font settings
+Each level lets you set:
+
+- Font size
+- Font weight
+- Font style
+- Font variant
+
+If you do not change any font settings, you may not see a visual difference even when a block is marked as H4-H6.
+
+## Compatibility
+
+- Sticky Headings (H4-H6 support)
+- Table of Contents (H4-H6 support)
+- Roam user-defined hotkeys
+
+## Migration notes
+
+If you previously used legacy tags like `#h4^^Heading^^`, those blocks still work. The preferred path going forward is using the toggle commands so the block property is stored directly.
+
+## Troubleshooting
+
+### I toggled a heading but nothing changed visually
+Update the font settings for H4-H6 so the styling is visible.
+
+### My legacy tags are not detected in other extensions
+Make sure your legacy tag settings are saved in Augmented Headings and then reload Roam so localStorage is updated.
