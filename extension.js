@@ -395,11 +395,6 @@ function headingsCSS() {
 
   baseCSS = `
 /* --- Augmented Headings CSS (per-UID mode) --- */
-.bp3-menu .ah-heading-button[data-ah-active='true'] {
-  background-color: rgba(72, 176, 240, 0.35) !important;
-  border-color: rgba(72, 176, 240, 0.7) !important;
-}
-
 [data-tag^='${t4}'] { display: none !important; }
 [data-tag^='${t4}'] + .rm-highlight { font-size: ${h4FS}px; font-weight: ${h4FW}; font-style: ${h4FSt}; font-variant: ${h4FV}; background: unset; }
 [data-tag^='${t5}'] { display: none !important; }
@@ -711,6 +706,7 @@ async function performContextMenuStateUpdate(menuEl, uid) {
       const level = btn.getAttribute("data-ah-level");
       if (level && level === active) {
         btn.setAttribute("data-ah-active", "true");
+        btn.style.backgroundColor = ROAM_ACTIVE_BG;
       } else {
         btn.removeAttribute("data-ah-active");
       }
@@ -743,7 +739,11 @@ function resetBlueprintButtonState(btn) {
   );
 
   btn.setAttribute("aria-pressed", "false");
+  btn.style.backgroundColor = "";
+  btn.style.borderColor = "";
 }
+
+const ROAM_ACTIVE_BG = "rgba(72, 176, 240, 0.5)";
 
 function buildHeadingButton(level, template) {
   const button = template.cloneNode(true);
