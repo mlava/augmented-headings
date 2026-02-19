@@ -51,8 +51,20 @@ Each level lets you set:
 
 If you do not change any font settings, you may not see a visual difference even when a block is marked as H4-H6.
 
+## Extension Tools API
+
+Augmented Headings registers on `window.RoamExtensionTools["augmented-headings"]` so other extensions can query and set heading levels programmatically. The registration follows the standard Extension Tools contract (`name`, `version`, `tools[]` with `name`, `description`, `parameters`, `execute`).
+
+### Tools
+
+- **`ah_get_heading_level`** — Get the augmented heading level for a block. Takes `{ uid }`, returns `{ success, uid, level }` where level is `"h4"`, `"h5"`, `"h6"`, or `null`.
+- **`ah_set_heading_level`** — Set or clear the heading level. Takes `{ uid, level }` where level is `"h4"`, `"h5"`, `"h6"`, or `""` to clear. Returns `{ success, level }` or `{ error }`.
+
+The [Export Document](https://github.com/mlava/export-document) extension uses this data automatically — H4-H6 headings are exported as `####`, `#####`, and `######` in markdown before conversion.
+
 ## Compatibility
 
+- Export Document (H4-H6 heading export)
 - Sticky Headings (H4-H6 support)
 - Table of Contents (H4-H6 support)
 - Roam user-defined hotkeys

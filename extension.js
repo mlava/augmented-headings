@@ -982,10 +982,14 @@ async function clearAugmentedHeadingProp(uid) {
 
 // -------------------- Toggle heading --------------------
 
-async function toggleHeading(uid, level) {
+async function applyHeadingLevel(uid, level) {
   if (!uid) {
-    toast("No focused block found.");
-    return;
+    return { error: "No block UID provided." };
+  }
+
+  const next = (level ?? "").trim().toLowerCase();
+  if (next && next !== "h4" && next !== "h5" && next !== "h6") {
+    return { error: `Invalid level "${level}". Must be "h4", "h5", "h6", or empty to clear.` };
   }
 
   const propKey = DEFAULT_PROP_KEY;
@@ -1008,21 +1012,13 @@ async function toggleHeading(uid, level) {
     const heading = await getBlockHeading(uid);
     const current = String(getPropValue(props, propKey) ?? "").trim().toLowerCase();
 
-    let next = "";
-    if (current === level) {
-      next = "";
-    } else {
-      next = level;
-    }
-
     if (next === current && str === oldStr && (!heading || heading === 0)) {
-      return;
+      return { success: true, level: next || null };
     }
 
     const nextProps = setPropValue(props, propKey, next);
     const block = { uid, props: nextProps };
 
-    // Always clear native heading when applying augmented heading
     if (next) {
       if (heading && heading > 0) {
         block.heading = 0;
@@ -1049,9 +1045,28 @@ async function toggleHeading(uid, level) {
 
     scheduleDecorate(0);
 
-    toast(next ? `Set heading to ${next.toUpperCase()}` : "Cleared heading");
+    return { success: true, level: next || null };
   } catch (err) {
-    toast("Failed to toggle heading. See console for details.");
+    return { error: "Failed to apply heading level." };
+  }
+}
+
+async function toggleHeading(uid, level) {
+  if (!uid) {
+    toast("No focused block found.");
+    return;
+  }
+
+  const props = (await getBlockProps(uid)) || {};
+  const current = String(getPropValue(props, DEFAULT_PROP_KEY) ?? "").trim().toLowerCase();
+  const next = current === level ? "" : level;
+
+  const result = await applyHeadingLevel(uid, next);
+
+  if (result.error) {
+    toast(result.error);
+  } else {
+    toast(next ? `Set heading to ${next.toUpperCase()}` : "Cleared heading");
   }
 }
 
@@ -1422,6 +1437,65 @@ export default {
       caches: { levelCache, queryCache, forcedLevels },
       visibleBlocks,
     };
+
+    window.RoamExtensionTools = window.RoamExtensionTools || {};
+    window.RoamExtensionTools["augmented-headings"] = {
+      name: "Augmented Headings",
+      version: "1.0",
+      tools: [
+        {
+          name: "ah_get_heading_level",
+          description: "Get the augmented heading level (H4/H5/H6) for a block by UID.",
+          parameters: {
+            type: "object",
+            properties: {
+              uid: {
+                type: "string",
+                description: "Block UID to check.",
+              },
+            },
+            required: ["uid"],
+          },
+          execute: async ({ uid }) => {
+            if (!uid) return { error: "No block UID provided." };
+            const cached = levelCache.get(uid);
+            if (cached && Date.now() - cached.ts < CACHE_TTL) {
+              return { success: true, uid, level: cached.level };
+            }
+            const props = await getBlockProps(uid);
+            const level = String(getPropValue(props, DEFAULT_PROP_KEY) ?? "").trim().toLowerCase();
+            if (level === "h4" || level === "h5" || level === "h6") {
+              return { success: true, uid, level };
+            }
+            const blockStr = await getBlockString(uid);
+            const legacyLevel = detectLegacyLevel(blockStr);
+            return { success: true, uid, level: legacyLevel || null };
+          },
+        },
+        {
+          name: "ah_set_heading_level",
+          description: "Set or clear the augmented heading level for a block. Clears any native H1-H3 heading and migrates legacy tag headings automatically.",
+          parameters: {
+            type: "object",
+            properties: {
+              uid: {
+                type: "string",
+                description: "Block UID to modify.",
+              },
+              level: {
+                type: "string",
+                enum: ["h4", "h5", "h6", ""],
+                description: "Heading level to apply. Use empty string to clear.",
+              },
+            },
+            required: ["uid"],
+          },
+          execute: async ({ uid, level }) => {
+            return applyHeadingLevel(uid, level || "");
+          },
+        },
+      ],
+    };
   },
 
   onunload: () => {
@@ -1461,6 +1535,8 @@ export default {
     queryCache.clear();
 
     setContextMenuButtonsEnabled(false);
+
+    delete window.RoamExtensionTools?.["augmented-headings"];
 
     try {
       window.roamAlphaAPI.ui.blockContextMenu.removeCommand({ label: "Toggle Heading - H4" });
