@@ -13,8 +13,10 @@ Augmented Headings lets you mark any block as H4-H6 and style those headings ind
 ## Features
 
 - Toggle H4-H6 via Command Palette or block context menu
+- Optional H4/H5/H6 buttons in the block context menu alongside native H1/H2/H3
 - Per-level font size, weight, style, and variant controls
 - Works alongside Roam native headings (H1-H3)
+- Theme-aware context menu buttons — active state uses the same inline styling as native heading buttons, so custom CSS themes apply automatically
 - Backward compatible with legacy tag-based headings
 
 ## Usage
